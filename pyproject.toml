@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "linkedin-optimizer"
+version = "0.1.0"
+description = "Evidence-based LinkedIn profile optimization and role alignment toolkit."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Naga Lokesh Sai Alla" }]
+dependencies = [
+  "pydantic>=2.7,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9",
+  "ruff>=0.6,<1",
+]
+
+[project.scripts]
+linkedin-optimizer = "linkedin_optimizer.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/linkedin_optimizer"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+target-version = "py311"
