@@ -13,9 +13,6 @@ def create_app():
         raise RuntimeError("Install the api extra: pip install 'linkedin-optimizer[api]'") from exc
 
     app = FastAPI(title="LinkedIn Optimizer", version="0.1.0")
-    web_root = Path(__file__).resolve().parents[2] / "web"
-    if web_root.exists():
-        app.mount("/", StaticFiles(directory=web_root, html=True), name="web")
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -25,6 +22,9 @@ def create_app():
     def analyze_profile(profile: Profile, role: Role):
         return analyze(profile, role)
 
+    web_root = Path(__file__).resolve().parents[2] / "web"
+    if web_root.exists():
+        app.mount("/", StaticFiles(directory=web_root, html=True), name="web")
     return app
 
 
