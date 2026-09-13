@@ -16,6 +16,17 @@ def test_role_alignment_and_metrics():
     assert any(signal.name == "measurable_evidence" and signal.score > 0 for signal in report.signals)
 
 
+def test_generic_job_posting_words_do_not_count_as_target_keywords():
+    profile = Profile(headline="Python Developer")
+    report = analyze(
+        profile,
+        Role(title="Software Engineer", description="We are looking for an engineer to join our team."),
+    )
+
+    assert report.matched_keywords == []
+    assert report.missing_keywords == []
+
+
 def test_empty_profile_is_safe():
     report = analyze(Profile(), Role(title="Software Engineer"))
     assert report.overall_score == 25.0
