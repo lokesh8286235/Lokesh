@@ -63,11 +63,23 @@ Profile / Resume + Target Role
 
 ## Quickstart
 
+This repository includes a small synthetic profile and target-role fixture so the complete deterministic path can be exercised immediately after cloning.
+
 ```bash
 python -m pip install -e '.[dev]'
-linkedin-optimizer profile.json --role "ML Engineer" --job job.md --scoring v2
-linkedin-optimizer --resume resume.md --role "ML Engineer" --job job.md --scoring v2
-linkedin-optimizer --compare before.json after.json --role "ML Engineer" --job job.md
+linkedin-optimizer examples/profile.json --role "Senior AI Engineer" --job examples/job.md --scoring v2
+```
+
+For your own resume/profile:
+
+```bash
+linkedin-optimizer --resume resume.md --role "AI Engineer" --job job.md --scoring v2
+```
+
+Before/after comparison remains available through the compatibility scoring contract:
+
+```bash
+linkedin-optimizer --compare before.json after.json --role "AI Engineer" --job job.md
 ```
 
 The CLI emits JSON. The deterministic analyzer sends no profile data anywhere.
@@ -133,6 +145,7 @@ The rewrite layer is deterministic and evidence-first:
 4. Preserve the original claim.
 5. Add only explicit evidence slots for facts that are missing.
 6. Verify that original metrics and technologies remain present.
+7. Reject candidates that introduce new numeric or technology claims.
 
 It will **not** invent a percentage, revenue number, user count, employer, technology, title, or outcome.
 
@@ -206,7 +219,7 @@ src/linkedin_optimizer/
 ├── analyzer_v2.py       # calibrated multi-dimensional scoring
 ├── evidence.py          # deterministic evidence signals
 ├── matching.py          # role/profile alignment
-├── rewriter.py          # truth-constrained rewrite candidates
+├── rewriter.py          # truth-constrained rewrite candidates + claim guard
 ├── scoring.py           # anti-gaming quality primitives
 ├── models.py            # typed report contracts
 ├── documents.py         # optional document ingestion
@@ -219,6 +232,10 @@ eval/
 ├── cases.json           # baseline regression cases
 ├── v2_cases.json        # v2 calibration fixtures
 └── benchmark_v2.py      # v1/v2 comparison
+
+examples/
+├── profile.json         # synthetic runnable profile
+└── job.md               # synthetic target role
 
 tests/
 ├── test_scoring.py
