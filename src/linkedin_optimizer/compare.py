@@ -1,15 +1,16 @@
 from .analyzer import analyze
-from .models import OptimizationReport, Profile, Role
+from .models import ComparisonReport, Profile, Role
 
 
-def compare(before: Profile, after: Profile, role: Role) -> dict:
+def compare(before: Profile, after: Profile, role: Role) -> ComparisonReport:
     """Compare two profile versions against the same target role."""
-    before_report: OptimizationReport = analyze(before, role)
-    after_report: OptimizationReport = analyze(after, role)
-    return {
-        "before_score": before_report.overall_score,
-        "after_score": after_report.overall_score,
-        "score_delta": round(after_report.overall_score - before_report.overall_score, 1),
-        "new_matches": sorted(set(after_report.matched_keywords) - set(before_report.matched_keywords)),
-        "remaining_missing": after_report.missing_keywords,
-    }
+    old = analyze(before, role)
+    new = analyze(after, role)
+    return ComparisonReport(
+        before_score=old.overall_score,
+        after_score=new.overall_score,
+        score_delta=round(new.overall_score - old.overall_score, 1),
+        newly_matched_keywords=sorted(set(new.matched_keywords) - set(old.matched_keywords)),
+        resolved_missing_keywords=sorted(set(old.missing_keywords) - set(new.missing_keywords)),
+        remaining_missing_keywords=new.missing_keywords,
+    )
