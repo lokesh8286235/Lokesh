@@ -3,14 +3,14 @@ import json
 
 from .analyzer import analyze
 from .compare import compare
+from .documents import load_document
 from .io import read_text
 from .models import Profile, Role
-from .resume import load_resume
 
 
 def _load_profile(path: str | None, resume: str | None) -> Profile:
     if resume:
-        return load_resume(resume)
+        return load_document(resume)
     if not path:
         raise ValueError("Provide a profile JSON path or --resume.")
     with open(path, encoding="utf-8") as handle:
@@ -20,7 +20,7 @@ def _load_profile(path: str | None, resume: str | None) -> Profile:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze a LinkedIn profile against a target role.")
     parser.add_argument("profile", nargs="?", help="Path to a JSON profile document")
-    parser.add_argument("--resume", help="Path to a TXT/Markdown resume")
+    parser.add_argument("--resume", help="Path to a TXT/Markdown/PDF/DOCX resume")
     parser.add_argument("--role", required=True, help="Target role title")
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--description", default=None, help="Target role description")
