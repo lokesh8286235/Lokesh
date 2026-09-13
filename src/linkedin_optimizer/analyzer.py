@@ -3,7 +3,7 @@ import re
 from .matching import role_alignment
 from .models import OptimizationReport, Profile, Role, Signal
 
-_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.I)
+_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.IGNORECASE)
 
 
 def analyze(profile: Profile, role: Role) -> OptimizationReport:
@@ -11,7 +11,7 @@ def analyze(profile: Profile, role: Role) -> OptimizationReport:
     about = profile.about.strip()
     experience = "\n".join(x.strip() for x in profile.experience if x.strip())
     skills = " ".join(profile.skills)
-    full_text = "\n".join((headline, about, experience, skills))
+    full_text = f"{headline}\n{about}\n{experience}\n{skills}"
 
     matched, missing, keyword_score = role_alignment(full_text, role.title + " " + role.description)
     target_count = len(matched) + len(missing)
