@@ -9,13 +9,15 @@ import re
 from .models import RewriteCandidate
 from .scoring import business_impact_score, ownership_score, technical_depth_score
 
-_METRIC_TOKEN = re.compile(r"\b(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.I)
+_METRIC_TOKEN = re.compile(
+    r"\b(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.IGNORECASE,
+)
 _TECH_TOKEN = re.compile(
     r"\b(?:Python|Java|TypeScript|JavaScript|React|Next\.js|FastAPI|Spring|Kafka|PostgreSQL|"
     r"MySQL|SQL|AWS|Azure|GCP|Docker|Kubernetes|Terraform|Airflow|PyTorch|TensorFlow|"
     r"LangChain|LLM|RAG|MLIR|ONNX|GraphQL|Redis|Snowflake|microservices?|distributed|"
     r"caching|observability|vector|quantization|inference)\b",
-    re.I,
+    re.IGNORECASE,
 )
 
 
@@ -54,7 +56,6 @@ def _rewrite(text: str) -> tuple[str, str, list[str]]:
     if not additions:
         return text, "Already contains strong ownership, technical, and outcome evidence; no rewrite was needed.", []
 
-    # Preserve the original claim verbatim and make every missing fact an explicit slot.
     rewritten = text.rstrip(" .") + ". " + " ".join(additions) + "."
     rationale = "Strengthen the weakest evidence dimensions without changing the source claim."
     return rewritten, rationale, gaps
