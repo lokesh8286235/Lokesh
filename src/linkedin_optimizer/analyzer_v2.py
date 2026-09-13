@@ -3,30 +3,22 @@ import re
 from .evidence import evidence_score
 from .matching import role_alignment
 from .models import OptimizationReport, Profile, Role, Signal
+from .scoring import business_impact_score, ownership_score, technical_depth_score
 
-_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.I)
-_OWNERSHIP = re.compile(
-    r"\b(?:owned|led|drove|spearheaded|architected|designed|built|developed|implemented|"
-    r"launched|delivered|migrated|automated|integrated|deployed|optimized|created|"
-    r"established|introduced|refactored)\b", re.I,
-)
-_TECHNICAL = re.compile(
-    r"\b(?:python|java|typescript|javascript|react|next\.js|fastapi|spring|kafka|"
-    r"postgres(?:ql)?|mysql|sql|aws|azure|gcp|docker|kubernetes|terraform|airflow|"
-    r"pytorch|tensorflow|langchain|llm|rag|mlir|onnx|graphql|redis|snowflake)\b", re.I,
-)
-_BUSINESS = re.compile(
-    r"\b(?:revenue|cost|costs|savings|saved|customers?|users?|conversion|retention|"
-    r"uptime|availability|sla|manual|hours?|time|throughput|latency|errors?|accuracy|"
-    r"precision|recall|incidents?|tickets?|requests?|queries?|transactions?)\b", re.I,
-)
 _SENIORITY = re.compile(
     r"\b(?:principal|staff|senior|lead|manager|director|head|mid-level|junior)\b", re.I,
 )
 
-
-def _bounded_count_score(count: int, points: int) -> float:
-    return min(100.0, float(count * points))
+WEIGHTS = {
+    "headline_specificity": 0.05,
+    "about_depth": 0.05,
+    "evidence_quality": 0.15,
+    "ownership": 0.15,
+    "technical_depth": 0.10,
+    "business_impact": 0.15,
+    "keyword_coverage": 0.25,
+    "seniority_alignment": 0.10,
+}
 
 
 def _seniority_alignment(profile_text: str, role_text: str) -> tuple[float, str]:
@@ -46,7 +38,7 @@ def _seniority_alignment(profile_text: str, role_text: str) -> tuple[float, str]
 
 
 def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
-    """Score positioning, ownership, technical depth, impact, role fit, and seniority."""
+    """Score positioning with independent, transparent anti-gaming dimensions."""
     headline = profile.headline.strip()
     about = profile.about.strip()
     experience = "\n".join(x.strip() for x in profile.experience if x.strip())
@@ -56,17 +48,13 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
 
     matched, missing, keyword_score = role_alignment(full_text, target_text)
     evidence, evidence_signals = evidence_score(experience)
-    metric_count = len(_METRIC.findall(experience))
-    ownership_count = len(_OWNERSHIP.findall(experience))
-    technical_count = len(_TECHNICAL.findall(full_text))
-    business_count = len(_BUSINESS.findall(experience))
+    ownership, ownership_signals = ownership_score(experience)
+    technical, technical_signals = technical_depth_score(experience)
+    impact, impact_signals = business_impact_score(experience)
+    seniority, seniority_evidence = _seniority_alignment(headline + "\n" + experience, target_text)
 
     headline_score = min(100.0, 35 + min(len(headline), 120) * 0.45) if headline else 0.0
     about_score = min(100.0, 25 + min(len(about), 1800) / 18) if about else 0.0
-    seniority_score, seniority_evidence = _seniority_alignment(full_text, target_text)
-    ownership_score = _bounded_count_score(ownership_count, 20)
-    technical_score = _bounded_count_score(technical_count, 10)
-    impact_score = min(100.0, metric_count * 25.0 + business_count * 5.0)
 
     signals = [
         Signal(
@@ -89,43 +77,39 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
                             if evidence < 80 else "Evidence is strong; keep outcomes tied to your personal contribution."),
         ),
         Signal(
-            category="experience", name="ownership", score=ownership_score,
-            evidence=f"Detected {ownership_count} ownership/action signal(s).",
-            recommendation=("Use precise first-person ownership verbs for work you personally delivered."
-                            if ownership_score < 60 else "Ownership is explicit; keep claims tied to shipped work."),
+            category="experience", name="ownership", score=ownership,
+            evidence=f"Distinct ownership/action signals: {ownership_signals['ownership_signals']}.",
+            recommendation=("Use precise ownership verbs for work you personally delivered."
+                            if ownership < 60 else "Ownership is explicit; keep claims tied to shipped work."),
         ),
         Signal(
-            category="technical_depth", name="technical_depth", score=technical_score,
-            evidence=f"Detected {technical_count} technical stack signal(s).",
-            recommendation=("Name the concrete systems, frameworks, and infrastructure used to deliver the work."
-                            if technical_score < 60 else "Technical depth is visible; connect technologies to engineering decisions."),
+            category="technical_depth", name="technical_depth", score=technical,
+            evidence=f"Distinct technical/system signals: {technical_signals['technical_signals']}.",
+            recommendation=("Name concrete systems and engineering concepts, not just generic skills."
+                            if technical < 60 else "Technical depth is visible; connect technologies to engineering decisions."),
         ),
         Signal(
-            category="impact", name="business_impact", score=impact_score,
-            evidence=f"Detected {metric_count} metric(s) and {business_count} impact/scope term(s).",
-            recommendation=("Tie technical work to measurable user, reliability, speed, cost, or business outcomes."
-                            if impact_score < 60 else "Impact evidence is visible; preserve the strongest measurable outcomes."),
+            category="impact", name="business_impact", score=impact,
+            evidence=(f"Metrics: {impact_signals['metrics']}; causal links: {impact_signals['causal_links']}; "
+                      f"impact terms: {impact_signals['impact_terms']}; scope terms: {impact_signals['scope_terms']} ."),
+            recommendation=("Tie technical work to measurable speed, reliability, cost, user, or business outcomes."
+                            if impact < 60 else "Impact evidence is visible; preserve the strongest causal outcomes."),
         ),
         Signal(
             category="role_alignment", name="keyword_coverage", score=keyword_score,
             evidence=f"Matched {len(matched)} of {len(matched) + len(missing)} target terms.",
             recommendation=("Coverage is strong; validate that matched terms reflect real experience."
-                            if keyword_score >= 70 else "Add only missing role terms genuinely supported by your experience."),
+                            if keyword_score >= 70 else "Add only missing role terms genuinely supported by experience."),
         ),
         Signal(
-            category="seniority", name="seniority_alignment", score=seniority_score,
+            category="seniority", name="seniority_alignment", score=seniority,
             evidence=seniority_evidence,
             recommendation=("Make scope and ownership explicit when the target role expects a higher level."
-                            if seniority_score < 80 else "Seniority signals are aligned; preserve ownership and scope language."),
+                            if seniority < 80 else "Seniority signals are aligned; preserve ownership and scope language."),
         ),
     ]
 
-    weights = {
-        "headline_specificity": 0.05, "about_depth": 0.05, "evidence_quality": 0.15,
-        "ownership": 0.15, "technical_depth": 0.10, "business_impact": 0.15,
-        "keyword_coverage": 0.25, "seniority_alignment": 0.10,
-    }
-    overall = round(sum(signal.score * weights[signal.name] for signal in signals), 1)
+    overall = round(sum(signal.score * WEIGHTS[signal.name] for signal in signals), 1)
     return OptimizationReport(
         overall_score=overall, signals=signals, matched_keywords=matched, missing_keywords=missing,
     )
