@@ -26,3 +26,12 @@ class OptimizationReport(BaseModel):
     signals: list[Signal]
     matched_keywords: list[str]
     missing_keywords: list[str]
+
+
+class ComparisonReport(BaseModel):
+    before_score: float = Field(ge=0, le=100)
+    after_score: float = Field(ge=0, le=100)
+    score_delta: float
+    newly_matched_keywords: list[str]
+    resolved_missing_keywords: list[str]
+    remaining_missing_keywords: list[str]
