@@ -1,0 +1,18 @@
+{
+  "headline": "Senior AI Engineer | Python | RAG | ML Systems",
+  "about": "AI engineer focused on retrieval quality, evaluation, inference performance, and reliable backend systems.",
+  "experience": [
+    "Architected and deployed a Python RAG service for 10K users, reducing p95 latency by 35% and doubling throughput.",
+    "Optimized C++ inference pipelines with multithreading and profiling, improving throughput by 3.2x.",
+    "Built evaluation workflows for retrieval quality and tracked precision across production queries."
+  ],
+  "skills": [
+    "Python",
+    "FastAPI",
+    "RAG",
+    "PostgreSQL",
+    "C++",
+    "PyTorch",
+    "Kubernetes"
+  ]
+}
