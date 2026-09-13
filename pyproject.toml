@@ -27,7 +27,7 @@ linkedin-optimizer = "linkedin_optimizer.cli:main"
 packages = ["src/linkedin_optimizer"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
 
 [tool.ruff]
