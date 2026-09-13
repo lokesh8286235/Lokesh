@@ -7,6 +7,7 @@ Open-source, local-first tooling for turning real career evidence into a clearer
 ## What it does
 
 - Scores headline, About, measurable evidence, and target-role alignment.
+- Provides a versioned v2 scoring engine with evidence quality and seniority alignment signals.
 - Matches job descriptions with transparent lexical rules and technical aliases.
 - Optionally adds embedding-based semantic similarity.
 - Loads TXT/Markdown resumes and optionally PDF/DOCX documents.
@@ -20,11 +21,12 @@ Open-source, local-first tooling for turning real career evidence into a clearer
 ```bash
 python -m pip install -e '.[dev]'
 linkedin-optimizer profile.json --role "ML Engineer" --job job.md
+linkedin-optimizer profile.json --role "ML Engineer" --job job.md --scoring v2
 linkedin-optimizer --resume resume.md --role "ML Engineer" --job job.md
 linkedin-optimizer --compare before.json after.json --role "ML Engineer" --job job.md
 ```
 
-The CLI emits machine-readable JSON. The deterministic analyzer requires no API key and does not send profile data anywhere.
+The CLI emits machine-readable JSON. The deterministic analyzer requires no API key and does not send profile data anywhere. `v1` remains the default for backward compatibility; `v2` is opt-in while its scoring behavior is evaluated independently.
 
 ### Resume formats
 
@@ -92,7 +94,10 @@ Regression cases live in `eval/cases.json` and can be run with:
 
 ```bash
 python scripts/evaluate.py
+python eval/benchmark_v2.py
 ```
+
+The v2 benchmark compares the legacy and v2 overall scores on fixed, deterministic profiles, making scoring changes inspectable rather than relying on subjective examples.
 
 Changes to scoring/parsing should add tests and, when behavior changes intentionally, update the evaluation cases.
 
@@ -117,7 +122,3 @@ This is not a scraper, impersonation tool, credential collector, or auto-publish
 ## Contributing
 
 See `CONTRIBUTING.md`. Quality changes should include tests. Security-sensitive issues should follow `SECURITY.md`.
-
-## License
-
-MIT
