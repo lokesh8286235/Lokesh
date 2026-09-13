@@ -3,6 +3,7 @@ import re
 from .evidence import evidence_score
 from .matching import role_alignment
 from .models import OptimizationReport, Profile, Role, Signal
+from .rewriter import generate_rewrite_candidates
 from .scoring import business_impact_score, ownership_score, technical_depth_score
 
 _SENIORITY = re.compile(
@@ -52,6 +53,7 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
     technical, technical_signals = technical_depth_score(experience)
     impact, impact_signals = business_impact_score(experience)
     seniority, seniority_evidence = _seniority_alignment(headline + "\n" + experience, target_text)
+    rewrite_candidates = generate_rewrite_candidates(profile.experience)
 
     headline_score = min(100.0, 35 + min(len(headline), 120) * 0.45) if headline else 0.0
     about_score = min(100.0, 25 + min(len(about), 1800) / 18) if about else 0.0
@@ -112,4 +114,5 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
     overall = round(sum(signal.score * WEIGHTS[signal.name] for signal in signals), 1)
     return OptimizationReport(
         overall_score=overall, signals=signals, matched_keywords=matched, missing_keywords=missing,
+        rewrite_candidates=rewrite_candidates,
     )
