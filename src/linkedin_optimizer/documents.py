@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from .resume import parse_resume_text
 from .models import Profile
+from .resume import parse_resume_text
 
 
 def load_document(path: str | Path) -> Profile:
