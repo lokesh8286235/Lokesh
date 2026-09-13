@@ -1,13 +1,16 @@
 import re
 
-_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.I)
+_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.IGNORECASE)
 _ACTION = re.compile(
     r"\b(?:built|designed|developed|architected|automated|optimized|improved|reduced|increased|"
     r"deployed|migrated|scaled|led|owned|implemented|launched|delivered|integrated)\b",
-    re.I,
+    re.IGNORECASE,
 )
-_SCOPE = re.compile(r"\b(?:users?|customers?|documents?|requests?|queries?|records?|services?|"
-                    r"teams?|gpus?|nodes?|instances?|systems?|applications?)\b", re.I)
+_SCOPE = re.compile(
+    r"\b(?:users?|customers?|documents?|requests?|queries?|records?|services?|"
+    r"teams?|gpus?|nodes?|instances?|systems?|applications?)\b",
+    re.IGNORECASE,
+)
 
 
 def evidence_score(text: str) -> tuple[float, dict[str, int]]:
