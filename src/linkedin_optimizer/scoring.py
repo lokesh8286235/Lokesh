@@ -4,7 +4,8 @@ import re
 
 # Count quantities that look like evidence, while avoiding bare years such as 2021.
 _METRIC = re.compile(
-    r"\b(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?[KMB]\+?|\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b",
+    r"(?:\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\+?|\b\d+(?:\.\d+)?[KMB]\+?|"
+    r"\b\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\b\d+(?:\.\d+)?x\b)",
     re.I,
 )
 _SCOPE = re.compile(
@@ -43,7 +44,6 @@ def _score(count: int, step: float, cap: float = 100.0) -> float:
 def ownership_score(text: str) -> tuple[float, dict[str, int]]:
     """Reward distinct ownership signals with diminishing returns to resist verb stuffing."""
     terms = {match.group(0).lower() for match in _OWNERSHIP.finditer(text)}
-    # The first few distinct signals matter most; additional verbs add progressively less.
     weights = (18.0, 14.0, 10.0, 7.0, 5.0, 4.0, 3.0)
     score = sum(weights[min(i, len(weights) - 1)] for i in range(len(terms)))
     return round(min(100.0, score), 1), {"ownership_signals": len(terms)}
