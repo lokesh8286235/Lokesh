@@ -8,14 +8,6 @@ Turn a real resume/profile and a target job description into a measurable alignm
 
 This project is deliberately built as an engineering system—not a prompt wrapper. The core scoring path is deterministic, inspectable, testable, and usable without an API key. Optional semantic and LLM layers sit outside that baseline.
 
-## Why a recruiter or hiring engineer should care
-
-A strong engineering profile is not just a list of keywords. It should make three things easy to verify:
-
-1. **What did this engineer personally build?**
-2. **How technically deep was the work?**
-3. **What measurable outcome did it produce?**
-
 LinkedIn Optimizer encodes those questions into a transparent scoring and evaluation pipeline instead of optimizing for keyword density alone.
 
 ## System
