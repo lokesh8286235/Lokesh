@@ -7,11 +7,13 @@ Open-source, local-first tooling for turning real career evidence into a clearer
 ## What it does
 
 - Scores headline, About, measurable evidence, and target-role alignment.
-- Matches job descriptions against a profile with transparent lexical rules and technical aliases.
-- Loads TXT/Markdown resumes into the same normalized profile model.
+- Matches job descriptions with transparent lexical rules and technical aliases.
+- Optionally adds embedding-based semantic similarity.
+- Loads TXT/Markdown resumes and optionally PDF/DOCX documents.
 - Compares before/after profile versions so improvements are measurable.
 - Exposes an optional JSON API and a small local browser UI.
-- Ships evaluation cases, tests, CI, and contribution/security policies.
+- Supports optional OpenAI and Anthropic recommendation adapters without making either provider a core dependency.
+- Ships evaluation cases, tests, CI, contribution, and security policies.
 
 ## Quickstart
 
@@ -22,7 +24,26 @@ linkedin-optimizer --resume resume.md --role "ML Engineer" --job job.md
 linkedin-optimizer --compare before.json after.json --role "ML Engineer" --job job.md
 ```
 
-The CLI emits machine-readable JSON. The core analyzer requires no API key and does not send profile data anywhere.
+The CLI emits machine-readable JSON. The deterministic analyzer requires no API key and does not send profile data anywhere.
+
+### Resume formats
+
+TXT/Markdown work with the core package. PDF/DOCX adapters are optional:
+
+```bash
+python -m pip install -e '.[documents]'
+linkedin-optimizer --resume resume.pdf --role "ML Engineer" --job job.md
+```
+
+### Semantic matching
+
+The baseline matcher is deterministic and transparent. For embedding similarity:
+
+```bash
+python -m pip install -e '.[semantic]'
+```
+
+Use `linkedin_optimizer.semantic.semantic_similarity(profile_text, role_text)` when semantic similarity is appropriate. The embedding model is optional and not downloaded by the core package.
 
 ### Optional API + UI
 
@@ -33,6 +54,17 @@ uvicorn linkedin_optimizer.api:app --reload
 
 Open the local server in a browser to use the UI, or call `POST /analyze` with `profile` and `role` JSON objects. `GET /health` provides a health check.
 
+### Optional LLM recommendations
+
+Provider adapters keep credentials in environment variables and are never invoked by the deterministic analyzer:
+
+```bash
+python -m pip install -e '.[openai]'
+python -m pip install -e '.[anthropic]'
+```
+
+Use `OpenAIProvider` or `AnthropicProvider` from `linkedin_optimizer.providers` with your own prompt and explicit user-controlled workflow.
+
 ## Architecture
 
 ```text
@@ -42,22 +74,17 @@ Profile JSON / Resume ──┐
 Job description ─► Normalizer   │
                  └──────┬───────┘
                         ▼
-              ┌───────────────────┐
-              │ Signal + Matcher  │
-              └─────────┬─────────┘
-                        ▼
-              ┌───────────────────┐
-              │ Evidence Report   │
-              └─────────┬─────────┘
-                        ▼
-            CLI / JSON API / Local UI
+          ┌──────────────────────────┐
+          │ Signals + lexical match  │
+          │ optional embeddings      │
+          └────────────┬─────────────┘
+                       ▼
+                Evidence Report
+                       │
+             ┌─────────┼─────────┐
+             ▼         ▼         ▼
+            CLI       API       Local UI
 ```
-
-## Scoring philosophy
-
-The baseline is intentionally deterministic. A reviewer can inspect the text, reproduce the result, and understand why a recommendation appeared. Technical aliases such as `K8s → Kubernetes`, `Postgres → PostgreSQL`, and `ML → machine-learning` improve recall without pretending that keyword overlap is true semantic understanding.
-
-The roadmap can add embeddings or LLM providers behind explicit adapters; the core will remain usable without them.
 
 ## Evaluation
 
@@ -71,12 +98,13 @@ Changes to scoring/parsing should add tests and, when behavior changes intention
 
 ## Design principles
 
-1. **Evidence over hype** — recommendations should be traceable to profile text.
+1. **Evidence over hype** — recommendations are traceable to profile text.
 2. **Human-controlled** — suggestions never publish changes automatically.
 3. **No fabrication** — never invent employers, metrics, skills, titles, or credentials.
 4. **Role-aware** — quality is measured against a target role.
 5. **Privacy-first** — local processing by default.
 6. **Provider-neutral** — advanced AI is optional, not a core dependency.
+7. **Reproducible** — deterministic scoring remains the regression baseline.
 
 ## Non-goals
 
@@ -84,7 +112,7 @@ This is not a scraper, impersonation tool, credential collector, or auto-publish
 
 ## Project status
 
-`0.1.0` is a working deterministic foundation. PDF/DOCX adapters, embedding-backed semantic matching, provider adapters, and richer evaluation suites are natural next layers rather than hidden assumptions.
+`0.1.0` is a working foundation covering deterministic scoring, role alignment, document ingestion, semantic matching, before/after comparison, optional API/UI, provider adapters, and regression evaluation. Future work can deepen extraction quality, evaluation coverage, and provider integrations.
 
 ## Contributing
 
