@@ -1,0 +1,52 @@
+[
+  {
+    "name": "strong evidence",
+    "profile": {
+      "headline": "Senior AI Engineer | Python | RAG",
+      "about": "I build production AI systems with measurable outcomes.",
+      "experience": ["Architected and deployed a RAG service for 10K users, reducing p95 latency by 35% and doubling throughput."],
+      "skills": ["Python", "RAG", "PostgreSQL"]
+    },
+    "role": {"title": "Senior AI Engineer", "description": "Build Python RAG systems with PostgreSQL and production services."}
+  },
+  {
+    "name": "technical but weak impact",
+    "profile": {
+      "headline": "AI Engineer | Python | Kubernetes",
+      "about": "Build backend and AI systems.",
+      "experience": ["Developed Python services with FastAPI, Kafka, PostgreSQL, Docker, Kubernetes and Redis."],
+      "skills": ["Python", "FastAPI", "Kafka", "Kubernetes"]
+    },
+    "role": {"title": "AI Engineer", "description": "Build production Python AI services."}
+  },
+  {
+    "name": "impact but weak ownership",
+    "profile": {
+      "headline": "AI Engineer",
+      "about": "AI engineer focused on reliability.",
+      "experience": ["System supported 20K users with 99.9% uptime and 40% lower latency."],
+      "skills": ["Python"]
+    },
+    "role": {"title": "AI Engineer", "description": "Build production Python systems."}
+  },
+  {
+    "name": "keyword stuffed",
+    "profile": {
+      "headline": "AI Engineer Python RAG AWS Kubernetes Kafka PostgreSQL",
+      "about": "Python RAG AWS Kubernetes Kafka PostgreSQL Python RAG AWS Kubernetes Kafka.",
+      "experience": ["Python RAG AWS Kubernetes Kafka PostgreSQL. Python RAG AWS Kubernetes Kafka."],
+      "skills": ["Python", "RAG", "AWS", "Kubernetes", "Kafka", "PostgreSQL"]
+    },
+    "role": {"title": "Senior AI Engineer", "description": "Build production Python RAG systems with AWS, Kubernetes, Kafka and PostgreSQL."}
+  },
+  {
+    "name": "generic",
+    "profile": {
+      "headline": "Software Engineer",
+      "about": "Experienced professional working on software projects.",
+      "experience": ["Worked on software applications and technology projects."],
+      "skills": ["Software"]
+    },
+    "role": {"title": "AI Engineer", "description": "Build production Python AI systems."}
+  }
+]
