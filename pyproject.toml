@@ -10,19 +10,12 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Naga Lokesh Sai Alla" }]
-dependencies = [
-  "pydantic>=2.7,<3",
-]
+dependencies = ["pydantic>=2.7,<3"]
 
 [project.optional-dependencies]
-dev = [
-  "pytest>=8.0,<9",
-  "ruff>=0.6,<1",
-]
-api = [
-  "fastapi>=0.115,<1",
-  "uvicorn>=0.30,<1",
-]
+dev = ["pytest>=8.0,<9", "ruff>=0.6,<1"]
+api = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
+documents = ["pypdf>=5.0,<7", "python-docx>=1.1,<2"]
 
 [project.scripts]
 linkedin-optimizer = "linkedin_optimizer.cli:main"
@@ -32,7 +25,6 @@ packages = ["src/linkedin_optimizer"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-
 testpaths = ["tests"]
 
 [tool.ruff]
