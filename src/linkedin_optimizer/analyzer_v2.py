@@ -7,7 +7,7 @@ from .rewriter import generate_rewrite_candidates
 from .scoring import business_impact_score, ownership_score, technical_depth_score
 
 _SENIORITY = re.compile(
-    r"\b(?:principal|staff|senior|lead|manager|director|head|mid-level|junior)\b", re.I,
+    r"\b(?:principal|staff|senior|lead|manager|director|head|mid-level|junior)\b", re.IGNORECASE,
 )
 
 WEIGHTS = {
@@ -44,7 +44,7 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
     about = profile.about.strip()
     experience = "\n".join(x.strip() for x in profile.experience if x.strip())
     skills = " ".join(profile.skills)
-    full_text = "\n".join((headline, about, experience, skills))
+    full_text = f"{headline}\n{about}\n{experience}\n{skills}"
     target_text = f"{role.title} {role.description}"
 
     matched, missing, keyword_score = role_alignment(full_text, target_text)
@@ -74,7 +74,7 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
         Signal(
             category="experience", name="evidence_quality", score=evidence,
             evidence=(f"Metrics: {evidence_signals['metrics']}; actions: {evidence_signals['actions']}; "
-                      f"scope terms: {evidence_signals['scope_terms']} ."),
+                      f"scope terms: {evidence_signals['scope_terms']}."),
             recommendation=("Prioritize quantified outcomes, ownership verbs, and explicit scale."
                             if evidence < 80 else "Evidence is strong; keep outcomes tied to your personal contribution."),
         ),
@@ -93,7 +93,7 @@ def analyze_v2(profile: Profile, role: Role) -> OptimizationReport:
         Signal(
             category="impact", name="business_impact", score=impact,
             evidence=(f"Metrics: {impact_signals['metrics']}; causal links: {impact_signals['causal_links']}; "
-                      f"impact terms: {impact_signals['impact_terms']}; scope terms: {impact_signals['scope_terms']} ."),
+                      f"impact terms: {impact_signals['impact_terms']}; scope terms: {impact_signals['scope_terms']}."),
             recommendation=("Tie technical work to measurable speed, reliability, cost, user, or business outcomes."
                             if impact < 60 else "Impact evidence is visible; preserve the strongest causal outcomes."),
         ),
