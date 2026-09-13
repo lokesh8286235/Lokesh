@@ -10,7 +10,9 @@ from .models import RewriteCandidate
 from .scoring import business_impact_score, ownership_score, technical_depth_score
 
 _METRIC_TOKEN = re.compile(
-    r"\b(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.IGNORECASE,
+    r"(?:\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\+?|\b\d+(?:\.\d+)?[KMB]\+?|"
+    r"\b\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\b\d+(?:\.\d+)?x\b)",
+    re.IGNORECASE,
 )
 _TECH_TOKEN = re.compile(
     r"\b(?:Python|Java|TypeScript|JavaScript|React|Next\.js|FastAPI|Spring|Kafka|PostgreSQL|"
@@ -83,11 +85,16 @@ def generate_rewrite_candidates(experience: list[str], limit: int = 3) -> list[R
 
 
 def validate_claim_preservation(candidate: RewriteCandidate) -> bool:
-    """Guard against accidental fabrication by requiring original metrics/technologies to remain."""
-    for token in _METRIC_TOKEN.findall(candidate.original):
-        if token.lower() not in candidate.rewritten.lower():
-            return False
-    for token in _TECH_TOKEN.findall(candidate.original):
-        if token.lower() not in candidate.rewritten.lower():
-            return False
-    return True
+    """Reject rewrites that remove or add numeric/technology claims."""
+    original_metrics = {token.lower() for token in _METRIC_TOKEN.findall(candidate.original)}
+    rewritten_metrics = {token.lower() for token in _METRIC_TOKEN.findall(candidate.rewritten)}
+    if not original_metrics.issubset(rewritten_metrics):
+        return False
+    if not rewritten_metrics.issubset(original_metrics):
+        return False
+
+    original_tech = {token.lower() for token in _TECH_TOKEN.findall(candidate.original)}
+    rewritten_tech = {token.lower() for token in _TECH_TOKEN.findall(candidate.rewritten)}
+    if not original_tech.issubset(rewritten_tech):
+        return False
+    return rewritten_tech.issubset(original_tech)
