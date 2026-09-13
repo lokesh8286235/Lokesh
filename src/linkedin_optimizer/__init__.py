@@ -5,8 +5,8 @@ from .quality_report import bullet_recommendations, improvement_plan
 
 __all__ = [
     "analyze",
-    "compare",
-    "role_similarity",
     "bullet_recommendations",
+    "compare",
     "improvement_plan",
+    "role_similarity",
 ]
