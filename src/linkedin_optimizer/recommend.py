@@ -3,10 +3,24 @@
 import re
 from dataclasses import dataclass
 
-_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.I)
-_SCOPE = re.compile(r"\b(?:\d+[KMB]?\+?\s+(?:users?|customers?|documents?|queries?|requests?|records?|teams?))\b", re.I)
-_ACTION = re.compile(r"\b(?:built|developed|implemented|designed|architected|deployed|optimized|led|owned|migrated|automated|launched|delivered)\b", re.I)
-_IMPACT = re.compile(r"\b(?:reduced|increased|improved|saved|boosted|lowered|raised|grew|cut)\b[^.!?]{0,120}", re.I)
+_METRIC = re.compile(
+    r"(?:\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\+?|\b\d+(?:\.\d+)?[KMB]\+?|"
+    r"\b\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\b\d+(?:\.\d+)?x\b)",
+    re.IGNORECASE,
+)
+_SCOPE = re.compile(
+    r"\b(?:\d+[KMB]?\+?\s+(?:users?|customers?|documents?|queries?|requests?|records?|teams?))\b",
+    re.IGNORECASE,
+)
+_ACTION = re.compile(
+    r"\b(?:built|developed|implemented|designed|architected|deployed|optimized|led|owned|"
+    r"migrated|automated|launched|delivered)\b",
+    re.IGNORECASE,
+)
+_IMPACT = re.compile(
+    r"\b(?:reduced|increased|improved|saved|boosted|lowered|raised|grew|cut)\b[^.!?]{0,120}",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -47,7 +61,6 @@ def recommend_bullet(text: str) -> RewriteRecommendation:
     if not _IMPACT.search(original):
         reasons.append("Connect the work to a measurable outcome when the source supports it.")
 
-    # Safe rewrite: normalize a weak opening without fabricating metrics or scope.
     rewritten = original
     weak_openers = ("worked on ", "helped with ", "responsible for ", "involved in ")
     lower = original.lower()
