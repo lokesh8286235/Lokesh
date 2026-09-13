@@ -6,34 +6,38 @@ import re
 _METRIC = re.compile(
     r"(?:\b\d{1,3}(?:,\d{3})+(?:\.\d+)?\+?|\b\d+(?:\.\d+)?[KMB]\+?|"
     r"\b\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\b\d+(?:\.\d+)?x\b)",
-    re.I,
+    re.IGNORECASE,
 )
 _SCOPE = re.compile(
     r"\b(?:users?|customers?|documents?|queries?|requests?|records?|services?|teams?|"
-    r"gpus?|nodes?|instances?|systems?|applications?|transactions?|images?|events?)\b", re.I,
+    r"gpus?|nodes?|instances?|systems?|applications?|transactions?|images?|events?)\b",
+    re.IGNORECASE,
 )
 _OWNERSHIP = re.compile(
     r"\b(?:owned|led|drove|spearheaded|architected|designed|built|developed|implemented|"
     r"launched|delivered|migrated|automated|integrated|deployed|optimized|created|"
-    r"established|introduced|refactored)\b", re.I,
+    r"established|introduced|refactored)\b",
+    re.IGNORECASE,
 )
 _TECHNICAL = re.compile(
     r"\b(?:python|java|typescript|javascript|react|next\.js|fastapi|spring|kafka|"
     r"postgres(?:ql)?|mysql|sql|aws|azure|gcp|docker|kubernetes|terraform|airflow|"
     r"pytorch|tensorflow|langchain|llm|rag|mlir|onnx|graphql|redis|snowflake|"
     r"microservices?|distributed|caching|observability|vector|quantization|inference|"
-    r"c\+\+|multithreading|profiling)\b", re.I,
+    r"c\+\+|multithreading|profiling)\b",
+    re.IGNORECASE,
 )
 _IMPACT = re.compile(
     r"\b(?:revenue|cost|costs|savings|saved|conversion|retention|uptime|availability|"
     r"sla|manual|hours?|throughput|latency|errors?|accuracy|precision|recall|incidents?|"
-    r"tickets?|transactions?)\b", re.I,
+    r"tickets?|transactions?)\b",
+    re.IGNORECASE,
 )
 _CAUSAL = re.compile(
     r"\b(?:reducing|reduced|increasing|increased|improving|improved|saving|saved|"
     r"cut|cuts|lowered|raised|grew|boosted|enabled|resulting|resulted)\b[^.!?]{0,100}"
     r"(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x|\d+(?:\.\d+)?[KMB]\+?)",
-    re.I,
+    re.IGNORECASE,
 )
 
 
