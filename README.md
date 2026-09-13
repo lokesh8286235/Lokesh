@@ -1,79 +1,94 @@
 # LinkedIn Optimizer
 
-Open-source tooling for turning a LinkedIn profile into a clearer, more searchable, and more credible professional profile.
+Open-source, local-first tooling for turning real career evidence into a clearer, more searchable professional profile.
+
+> **Optimize representation, never qualifications.**
 
 ## What it does
 
-LinkedIn Optimizer analyzes profile text against a target role and produces **evidence-based recommendations** across:
+- Scores headline, About, measurable evidence, and target-role alignment.
+- Matches job descriptions against a profile with transparent lexical rules and technical aliases.
+- Loads TXT/Markdown resumes into the same normalized profile model.
+- Compares before/after profile versions so improvements are measurable.
+- Exposes an optional JSON API and a small local browser UI.
+- Ships evaluation cases, tests, CI, and contribution/security policies.
 
-- **Headline** — clarity, role targeting, keywords, and specificity
-- **About** — positioning, proof, readability, and structure
-- **Experience** — impact, ownership, metrics, and action-oriented language
-- **Skills** — relevance and keyword coverage against a target role
-- **Role alignment** — meaningful keyword coverage from a job description
-
-The goal is not to manufacture buzzwords or spam keywords. It is to help people communicate real experience more effectively.
-
-## Current MVP
-
-The project is currently a deterministic Python toolkit. It accepts a structured profile plus either a role description string or a UTF-8 job-description file.
+## Quickstart
 
 ```bash
-pip install -e '.[dev]'
-careeropt profile.json --role "ML Engineer" --job job.md
+python -m pip install -e '.[dev]'
+linkedin-optimizer profile.json --role "ML Engineer" --job job.md
+linkedin-optimizer --resume resume.md --role "ML Engineer" --job job.md
+linkedin-optimizer --compare before.json after.json --role "ML Engineer" --job job.md
 ```
 
-The CLI emits JSON containing the overall score, individual signals, matched keywords, and missing keywords. No external API key is required for the deterministic analyzer.
+The CLI emits machine-readable JSON. The core analyzer requires no API key and does not send profile data anywhere.
 
-## Design principles
+### Optional API + UI
 
-1. **Evidence over hype** — recommendations should point to the text that caused them.
-2. **Human-controlled** — the tool suggests changes; the user decides what is true.
-3. **No fabricated experience** — never invent employers, metrics, skills, titles, or credentials.
-4. **Role-aware** — optimization should be evaluated against a target role, not a generic score.
-5. **Privacy-first** — profile and job text are processed locally by default.
+```bash
+python -m pip install -e '.[api]'
+uvicorn linkedin_optimizer.api:app --reload
+```
+
+Open the local server in a browser to use the UI, or call `POST /analyze` with `profile` and `role` JSON objects. `GET /health` provides a health check.
 
 ## Architecture
 
 ```text
-Profile JSON ───────────┐
+Profile JSON / Resume ──┐
                         ▼
-                 ┌───────────────┐
-Job description ─► Role Matcher  │
-                 └───────┬───────┘
-                         ▼
-                 ┌───────────────┐
-                 │ Signal Engine │
-                 └───────┬───────┘
-                         ▼
-                 ┌───────────────┐
-                 │ Report / JSON  │
-                 └───────────────┘
+                 ┌──────────────┐
+Job description ─► Normalizer   │
+                 └──────┬───────┘
+                        ▼
+              ┌───────────────────┐
+              │ Signal + Matcher  │
+              └─────────┬─────────┘
+                        ▼
+              ┌───────────────────┐
+              │ Evidence Report   │
+              └─────────┬─────────┘
+                        ▼
+            CLI / JSON API / Local UI
 ```
 
-## Roadmap
+## Scoring philosophy
 
-- [x] Profile input schema
-- [x] Deterministic profile-quality analyzer
-- [x] Target-role keyword coverage
-- [x] Evidence-backed recommendations
-- [x] Job-description file input
-- [ ] Resume document ingestion
-- [ ] Semantic role matching
-- [ ] Before/after comparison
-- [ ] LLM-assisted recommendations with provider adapters
-- [ ] Evaluation dataset and regression benchmarks
-- [ ] JSON API
-- [ ] Web interface
-- [ ] First tagged release
+The baseline is intentionally deterministic. A reviewer can inspect the text, reproduce the result, and understand why a recommendation appeared. Technical aliases such as `K8s → Kubernetes`, `Postgres → PostgreSQL`, and `ML → machine-learning` improve recall without pretending that keyword overlap is true semantic understanding.
 
-## Important boundary
+The roadmap can add embeddings or LLM providers behind explicit adapters; the core will remain usable without them.
 
-This project is an **optimization assistant**, not a LinkedIn automation bot. It should not scrape private data, impersonate users, fabricate credentials, or automatically publish changes without explicit user control.
+## Evaluation
+
+Regression cases live in `eval/cases.json` and can be run with:
+
+```bash
+python scripts/evaluate.py
+```
+
+Changes to scoring/parsing should add tests and, when behavior changes intentionally, update the evaluation cases.
+
+## Design principles
+
+1. **Evidence over hype** — recommendations should be traceable to profile text.
+2. **Human-controlled** — suggestions never publish changes automatically.
+3. **No fabrication** — never invent employers, metrics, skills, titles, or credentials.
+4. **Role-aware** — quality is measured against a target role.
+5. **Privacy-first** — local processing by default.
+6. **Provider-neutral** — advanced AI is optional, not a core dependency.
+
+## Non-goals
+
+This is not a scraper, impersonation tool, credential collector, or auto-publisher. It does not require LinkedIn login credentials.
+
+## Project status
+
+`0.1.0` is a working deterministic foundation. PDF/DOCX adapters, embedding-backed semantic matching, provider adapters, and richer evaluation suites are natural next layers rather than hidden assumptions.
 
 ## Contributing
 
-Contributions should improve analysis quality, test coverage, documentation, or developer experience. New scoring rules should include deterministic tests and explain what evidence they use.
+See `CONTRIBUTING.md`. Quality changes should include tests. Security-sensitive issues should follow `SECURITY.md`.
 
 ## License
 
