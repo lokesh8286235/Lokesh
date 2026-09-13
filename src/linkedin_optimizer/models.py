@@ -21,11 +21,21 @@ class Signal(BaseModel):
     recommendation: str
 
 
+class RewriteCandidate(BaseModel):
+    """A factual rewrite that preserves source claims and exposes missing evidence."""
+
+    original: str
+    rewritten: str
+    rationale: str
+    missing_evidence: list[str] = Field(default_factory=list)
+
+
 class OptimizationReport(BaseModel):
     overall_score: float = Field(ge=0, le=100)
     signals: list[Signal]
     matched_keywords: list[str]
     missing_keywords: list[str]
+    rewrite_candidates: list[RewriteCandidate] = Field(default_factory=list)
 
 
 class ComparisonReport(BaseModel):
