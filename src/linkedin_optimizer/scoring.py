@@ -2,10 +2,14 @@
 
 import re
 
-_METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.I)
+# Count quantities that look like evidence, while avoiding bare years such as 2021.
+_METRIC = re.compile(
+    r"\b(?:\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?[KMB]\+?|\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b",
+    re.I,
+)
 _SCOPE = re.compile(
     r"\b(?:users?|customers?|documents?|queries?|requests?|records?|services?|teams?|"
-    r"gpus?|nodes?|instances?|systems?|applications?|transactions?)\b", re.I,
+    r"gpus?|nodes?|instances?|systems?|applications?|transactions?|images?|events?)\b", re.I,
 )
 _OWNERSHIP = re.compile(
     r"\b(?:owned|led|drove|spearheaded|architected|designed|built|developed|implemented|"
@@ -16,7 +20,8 @@ _TECHNICAL = re.compile(
     r"\b(?:python|java|typescript|javascript|react|next\.js|fastapi|spring|kafka|"
     r"postgres(?:ql)?|mysql|sql|aws|azure|gcp|docker|kubernetes|terraform|airflow|"
     r"pytorch|tensorflow|langchain|llm|rag|mlir|onnx|graphql|redis|snowflake|"
-    r"microservices?|distributed|caching|observability|vector|quantization|inference)\b", re.I,
+    r"microservices?|distributed|caching|observability|vector|quantization|inference|"
+    r"c\+\+|multithreading|profiling)\b", re.I,
 )
 _IMPACT = re.compile(
     r"\b(?:revenue|cost|costs|savings|saved|conversion|retention|uptime|availability|"
@@ -25,8 +30,9 @@ _IMPACT = re.compile(
 )
 _CAUSAL = re.compile(
     r"\b(?:reducing|reduced|increasing|increased|improving|improved|saving|saved|"
-    r"cut|cuts|lowered|raised|grew|boosted|enabled|resulting|resulted|to)\b[^.!?]{0,100}"
-    r"(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x)\b", re.I,
+    r"cut|cuts|lowered|raised|grew|boosted|enabled|resulting|resulted)\b[^.!?]{0,100}"
+    r"(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x|\d+(?:\.\d+)?[KMB]\+?)\b",
+    re.I,
 )
 
 
@@ -35,9 +41,12 @@ def _score(count: int, step: float, cap: float = 100.0) -> float:
 
 
 def ownership_score(text: str) -> tuple[float, dict[str, int]]:
-    """Reward distinct ownership signals, capped to prevent verb stuffing."""
-    count = len(_OWNERSHIP.findall(text))
-    return _score(count, 18), {"ownership_signals": count}
+    """Reward distinct ownership signals with diminishing returns to resist verb stuffing."""
+    terms = {match.group(0).lower() for match in _OWNERSHIP.finditer(text)}
+    # The first few distinct signals matter most; additional verbs add progressively less.
+    weights = (18.0, 14.0, 10.0, 7.0, 5.0, 4.0, 3.0)
+    score = sum(weights[min(i, len(weights) - 1)] for i in range(len(terms)))
+    return round(min(100.0, score), 1), {"ownership_signals": len(terms)}
 
 
 def technical_depth_score(text: str) -> tuple[float, dict[str, int]]:
