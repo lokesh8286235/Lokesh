@@ -7,7 +7,7 @@ def test_evidence_score_rewards_metrics_actions_and_scope() -> None:
     )
     assert score > 0
     assert signals["metrics"] == 2
-    assert signals["actions"] == 2
+    assert signals["actions"] == 3
     assert signals["scope_terms"] == 1
 
 
