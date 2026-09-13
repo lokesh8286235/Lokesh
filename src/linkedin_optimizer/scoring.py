@@ -32,7 +32,7 @@ _IMPACT = re.compile(
 _CAUSAL = re.compile(
     r"\b(?:reducing|reduced|increasing|increased|improving|improved|saving|saved|"
     r"cut|cuts|lowered|raised|grew|boosted|enabled|resulting|resulted)\b[^.!?]{0,100}"
-    r"(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x|\d+(?:\.\d+)?[KMB]\+?)\b",
+    r"(?:\d+(?:\.\d+)?%|\$\d+(?:\.\d+)?[KMB]?|\d+(?:\.\d+)?x|\d+(?:\.\d+)?[KMB]\+?)",
     re.I,
 )
 
