@@ -80,7 +80,7 @@ The CLI emits JSON. The deterministic analyzer sends no profile data anywhere.
 
 ```json
 {
-  "overall_score": 84.7,
+  "overall_score": 91,
   "signals": [
     {"name": "ownership", "score": 72.0},
     {"name": "technical_depth", "score": 81.0},
