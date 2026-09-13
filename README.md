@@ -8,11 +8,17 @@ Turn a real resume/profile and a target job description into a measurable alignm
 
 This project is deliberately built as an engineering system—not a prompt wrapper. The core scoring path is deterministic, inspectable, testable, and usable without an API key. Optional semantic and LLM layers sit outside that baseline.
 
-## Why this exists
+## Why a recruiter or hiring engineer should care
 
-Most profile optimizers reward keyword density. That creates a bad failure mode: a profile can look optimized while saying very little about what the engineer actually built.
+A strong engineering profile is not just a list of keywords. It should make three things easy to verify:
 
-LinkedIn Optimizer treats a profile as evidence:
+1. **What did this engineer personally build?**
+2. **How technically deep was the work?**
+3. **What measurable outcome did it produce?**
+
+LinkedIn Optimizer encodes those questions into a transparent scoring and evaluation pipeline instead of optimizing for keyword density alone.
+
+## System
 
 ```text
 Profile / Resume + Target Role
@@ -48,7 +54,7 @@ Profile / Resume + Target Role
 - **Evidence-backed rewrites** — the weakest experience statements are selected first and strengthened without inventing facts.
 - **Claim preservation** — existing metrics and technologies must survive a rewrite; missing facts become explicit `[add verified ...]` slots.
 - **Role alignment** — deterministic matching with technical aliases, plus optional embedding similarity.
-- **Versioned scoring** — v1 remains the compatibility baseline; v2 is opt-in and evaluated independently.
+- **Versioned scoring** — v1 remains the compatibility baseline; v2 is independently calibrated and opt-in.
 - **Document ingestion** — TXT/Markdown in core; optional PDF/DOCX adapters.
 - **Before/after comparison** — profile changes can be measured instead of judged by feel.
 - **Developer interfaces** — machine-readable CLI output and an optional FastAPI/local UI.
@@ -66,7 +72,7 @@ linkedin-optimizer --compare before.json after.json --role "ML Engineer" --job j
 
 The CLI emits JSON. The deterministic analyzer sends no profile data anywhere.
 
-### Example output shape
+## Example output shape
 
 ```json
 {
@@ -88,7 +94,7 @@ The CLI emits JSON. The deterministic analyzer sends no profile data anywhere.
 }
 ```
 
-The example demonstrates the important guarantee: **the tool does not invent the missing result.**
+The example demonstrates the key guarantee: **the tool does not invent the missing result.**
 
 ## Scoring model
 
@@ -107,6 +113,16 @@ The v2 engine separates dimensions so one signal family cannot dominate the enti
 
 The weighted score is intentionally inspectable in `src/linkedin_optimizer/analyzer_v2.py`.
 
+### Anti-gaming design
+
+The scoring primitives deliberately resist easy optimization hacks:
+
+- repeated ownership verbs do not earn unlimited credit;
+- technical depth counts distinct concepts rather than repeated keywords;
+- business impact favors measurable quantities and causal outcomes;
+- bare years are not treated as performance metrics;
+- calibration fixtures explicitly compare evidence-rich and keyword-stuffed profiles.
+
 ## Truth-constrained rewriting
 
 The rewrite layer is deterministic and evidence-first:
@@ -120,6 +136,22 @@ The rewrite layer is deterministic and evidence-first:
 
 It will **not** invent a percentage, revenue number, user count, employer, technology, title, or outcome.
 
+## API
+
+The original endpoint remains available for compatibility:
+
+```text
+POST /analyze
+```
+
+The calibrated engine is exposed separately:
+
+```text
+POST /v2/analyze
+```
+
+Both accept typed `Profile` and `Role` models. The v2 response includes quality dimensions, role gaps, and rewrite candidates.
+
 ## Evaluation
 
 Regression data lives in `eval/` and tests live in `tests/`.
@@ -130,7 +162,7 @@ python eval/benchmark_v2.py
 python -m pytest
 ```
 
-The calibration suite specifically checks that evidence-rich profiles beat keyword stuffing and that technical depth without impact is not mistaken for strong business evidence.
+The calibration suite checks that evidence-rich profiles beat keyword stuffing and that technical depth without impact is not mistaken for strong business evidence.
 
 When scoring behavior changes intentionally, update the evaluation cases and tests in the same change.
 
@@ -180,7 +212,7 @@ src/linkedin_optimizer/
 ├── documents.py         # optional document ingestion
 ├── semantic.py          # optional embeddings
 ├── providers.py         # optional LLM adapters
-├── api.py               # optional FastAPI surface
+├── api.py               # compatibility + v2 FastAPI surface
 └── cli.py               # command-line entry point
 
 eval/
@@ -210,7 +242,7 @@ This is not a LinkedIn scraper, impersonation tool, credential collector, or aut
 
 ## Status
 
-**0.1.x — active engineering project.** The repository currently focuses on deterministic role alignment, calibrated profile quality scoring, evidence-backed rewrites, evaluation, and developer tooling. The roadmap favors deeper evaluation and extraction quality over adding superficial features.
+**0.1.x — active engineering project.** Current work focuses on calibrated scoring, adversarial evaluation, safe rewriting, and developer interfaces. The roadmap favors measurable quality improvements over cosmetic features.
 
 ## Contributing
 
