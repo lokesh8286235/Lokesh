@@ -1,0 +1,14 @@
+[
+  {
+    "name": "backend-match",
+    "profile": {"headline": "Python Backend Engineer", "about": "Build APIs", "experience": ["Reduced latency 35%"], "skills": ["Python", "FastAPI", "PostgreSQL"]},
+    "role": {"title": "Python Backend Engineer", "description": "Python FastAPI PostgreSQL"},
+    "min_score": 50
+  },
+  {
+    "name": "generic-profile",
+    "profile": {"headline": "Developer", "about": "Software professional", "experience": [], "skills": []},
+    "role": {"title": "ML Engineer", "description": "Python PyTorch Kubernetes"},
+    "max_score": 50
+  }
+]
