@@ -1,26 +1,9 @@
 import re
-from collections import Counter
 
+from .matching import role_alignment
 from .models import OptimizationReport, Profile, Role, Signal
 
-_WORD = re.compile(r"[A-Za-z][A-Za-z0-9+#.-]*")
 _METRIC = re.compile(r"\b(?:\d+(?:\.\d+)?%?|\$\d+(?:\.\d+)?[KMB]?|\d+x)\b", re.I)
-_STOPWORDS = {
-    "about", "after", "also", "and", "are", "been", "being", "built", "for",
-    "from", "have", "into", "more", "that", "the", "their", "this", "using",
-    "with", "work", "worked", "you", "your", "will", "role", "team", "years",
-    "candidate", "candidates", "company", "companies", "description", "experience",
-    "responsibilities", "responsibility", "requirements", "requirement", "position",
-    "software", "engineer", "developer", "developers", "employee", "employees",
-}
-
-
-def _tokens(text: str) -> list[str]:
-    return [w.lower() for w in _WORD.findall(text) if len(w) > 2 and w.lower() not in _STOPWORDS]
-
-
-def _keyword_set(text: str) -> set[str]:
-    return set(_tokens(text))
 
 
 def analyze(profile: Profile, role: Role) -> OptimizationReport:
@@ -30,11 +13,8 @@ def analyze(profile: Profile, role: Role) -> OptimizationReport:
     skills = " ".join(profile.skills)
     full_text = "\n".join((headline, about, experience, skills))
 
-    role_words = Counter(_tokens(role.title + " " + role.description))
-    profile_words = _keyword_set(full_text)
-    target_keywords = set(role_words)
-    matched = sorted(target_keywords & profile_words)
-    missing = sorted(target_keywords - profile_words)
+    matched, missing, keyword_score = role_alignment(full_text, role.title + " " + role.description)
+    target_count = len(matched) + len(missing)
 
     signals: list[Signal] = []
     headline_score = min(100.0, 35 + min(len(headline), 120) * 0.45) if headline else 0
@@ -62,11 +42,10 @@ def analyze(profile: Profile, role: Role) -> OptimizationReport:
                         if metric_count else "Add truthful metrics, scale, latency, volume, reliability, or business outcomes."),
     ))
 
-    keyword_score = 100.0 if not target_keywords else round(100 * len(matched) / len(target_keywords), 1)
     signals.append(Signal(
         category="role_alignment", name="keyword_coverage", score=keyword_score,
-        evidence=f"Matched {len(matched)} of {len(target_keywords)} extracted target terms.",
-        recommendation=("Coverage is strong; validate that every keyword reflects real experience."
+        evidence=f"Matched {len(matched)} of {target_count} meaningful target terms.",
+        recommendation=("Coverage is strong; validate that every matched term reflects real experience."
                         if keyword_score >= 70 else "Add only missing role terms that are genuinely supported by your experience."),
     ))
 
