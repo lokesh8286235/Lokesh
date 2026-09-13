@@ -9,6 +9,9 @@ _STOPWORDS = {
     "about", "after", "also", "and", "are", "been", "being", "built", "for",
     "from", "have", "into", "more", "that", "the", "their", "this", "using",
     "with", "work", "worked", "you", "your", "will", "role", "team", "years",
+    "candidate", "candidates", "company", "companies", "description", "experience",
+    "responsibilities", "responsibility", "requirements", "requirement", "position",
+    "software", "engineer", "developer", "developers", "employee", "employees",
 }
 
 
@@ -29,7 +32,7 @@ def analyze(profile: Profile, role: Role) -> OptimizationReport:
 
     role_words = Counter(_tokens(role.title + " " + role.description))
     profile_words = _keyword_set(full_text)
-    target_keywords = {word for word, count in role_words.items() if count >= 1}
+    target_keywords = set(role_words)
     matched = sorted(target_keywords & profile_words)
     missing = sorted(target_keywords - profile_words)
 
