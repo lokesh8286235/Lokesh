@@ -7,9 +7,9 @@ class RecommendationProvider(Protocol):
 
 
 class OpenAIProvider:
-    """Optional OpenAI adapter. The core package never requires an API key."""
+    """Optional OpenAI adapter; credentials stay in the environment."""
 
-    def __init__(self, model: str = "gpt-4.1-mini") -> None:
+    def __init__(self, model: str = "gpt-5.6-luna") -> None:
         try:
             from openai import OpenAI
         except ImportError as exc:
@@ -23,7 +23,7 @@ class OpenAIProvider:
 
 
 class AnthropicProvider:
-    """Optional Anthropic adapter. The core package remains provider-neutral."""
+    """Optional Anthropic adapter; credentials stay in the environment."""
 
     def __init__(self, model: str = "claude-3-5-haiku-latest") -> None:
         try:
