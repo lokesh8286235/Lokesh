@@ -1,33 +1,13 @@
-"""Compare the legacy and v2 scoring engines on deterministic fixtures."""
+"""Compare v1/v2 and expose calibrated quality dimensions."""
 
 import json
+from pathlib import Path
 
 from linkedin_optimizer.analyzer import analyze
 from linkedin_optimizer.analyzer_v2 import analyze_v2
 from linkedin_optimizer.models import Profile, Role
 
-CASES = [
-    {
-        "name": "strong evidence + seniority",
-        "profile": {
-            "headline": "Senior AI Engineer | Python | RAG",
-            "about": "I build production AI systems with measurable outcomes.",
-            "experience": ["Architected and deployed a RAG service for 10K users, reducing latency by 35%."],
-            "skills": ["Python", "RAG", "PostgreSQL"],
-        },
-        "role": {"title": "Senior AI Engineer", "description": "Build Python RAG systems with PostgreSQL and production services."},
-    },
-    {
-        "name": "weak evidence + seniority gap",
-        "profile": {
-            "headline": "AI Engineer",
-            "about": "Software engineer interested in AI.",
-            "experience": ["Worked on software."],
-            "skills": ["Python"],
-        },
-        "role": {"title": "Staff AI Engineer", "description": "Lead production Python RAG systems with PostgreSQL."},
-    },
-]
+CASES = json.loads((Path(__file__).with_name("v2_cases.json")).read_text(encoding="utf-8"))
 
 
 def main() -> None:
@@ -35,9 +15,20 @@ def main() -> None:
     for case in CASES:
         profile = Profile.model_validate(case["profile"])
         role = Role.model_validate(case["role"])
+        report = analyze_v2(profile, role)
+        signals = {signal.name: signal.score for signal in report.signals}
         v1 = analyze(profile, role).overall_score
-        v2 = analyze_v2(profile, role).overall_score
-        rows.append({"case": case["name"], "v1": v1, "v2": v2, "delta": round(v2 - v1, 1)})
+        rows.append({
+            "case": case["name"],
+            "v1": v1,
+            "v2": report.overall_score,
+            "delta": round(report.overall_score - v1, 1),
+            "ownership": signals["ownership"],
+            "technical_depth": signals["technical_depth"],
+            "business_impact": signals["business_impact"],
+            "evidence_quality": signals["evidence_quality"],
+            "keyword_coverage": signals["keyword_coverage"],
+        })
     print(json.dumps(rows, indent=2))
 
 
