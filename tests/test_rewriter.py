@@ -46,3 +46,21 @@ def test_claim_guard_rejects_removed_metric() -> None:
         rationale="bad rewrite",
     )
     assert not validate_claim_preservation(candidate)
+
+
+def test_claim_guard_rejects_added_metric() -> None:
+    candidate = RewriteCandidate(
+        original="Reduced latency using Python.",
+        rewritten="Reduced latency by 50% using Python.",
+        rationale="fabricated result",
+    )
+    assert not validate_claim_preservation(candidate)
+
+
+def test_claim_guard_rejects_added_technology() -> None:
+    candidate = RewriteCandidate(
+        original="Built a Python service.",
+        rewritten="Built a Python and Kubernetes service.",
+        rationale="fabricated technology",
+    )
+    assert not validate_claim_preservation(candidate)
